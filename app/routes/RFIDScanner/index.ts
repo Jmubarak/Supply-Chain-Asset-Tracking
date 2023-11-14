@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import RFIDScannerController from './controller';
 import { rfidScannerValidators } from '../../middleware/RFIDScannerValidators';
-// If you need token validation or any other middleware, import it here
+
 
 const router = Router();
 

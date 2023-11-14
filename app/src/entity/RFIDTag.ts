@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { ShipmentOrder } from './ShipmentOrder';
+import { User } from './User';
 
 @Entity()
 export class RFIDTag {
@@ -9,4 +10,9 @@ export class RFIDTag {
     @ManyToOne(() => ShipmentOrder)
     @JoinColumn({ name: 'associatedOrderID' })
     associatedOrder: ShipmentOrder;
+
+    // New relationship with User
+    @ManyToOne(() => User)
+    @JoinColumn({ name: 'createdByUserID' })
+    createdByUser: User;
 }
