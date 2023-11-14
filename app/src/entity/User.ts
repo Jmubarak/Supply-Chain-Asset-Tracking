@@ -1,5 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Product } from './Product';
+import { ProductCategory } from './ProductCategory'; 
+import { NonUser } from './NonUser';  
 
 @Entity()
 export class User {
@@ -20,4 +22,12 @@ export class User {
 
     @OneToMany(() => Product, product => product.user)
     products: Product[];
+
+    
+    @OneToMany(() => ProductCategory, category => category.user)
+    categories: ProductCategory[];
+
+
+    @OneToMany(() => NonUser, nonUser => nonUser.createdByUser)
+    nonUsersCreated: NonUser[];
 }

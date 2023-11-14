@@ -10,5 +10,5 @@ export class RFIDScanner {
     @JoinColumn({ name: 'nodeID' })
     node: SensorNode;
 
-    // Additional columns can be added as needed.
+    
 }

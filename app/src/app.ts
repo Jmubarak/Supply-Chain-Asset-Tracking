@@ -8,6 +8,13 @@ import { ErrorRequestHandler } from 'express';
 
 import userRoutes from '../routes/user/index';
 
+import productRoutes from '../routes/product/index';
+
+import productCategoryRoutes from '../routes/productCategory'
+
+import rfidScannerRoutes from '../routes/RFIDScanner'
+
+import ShipmentOrderRoutes from '../routes/shipmentOrder';
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     // Log the error (consider using a more sophisticated logger in a real application)
@@ -36,6 +43,10 @@ app.use((req, res, next) => {
 
 
 app.use('/user', userRoutes);
+app.use('/product', productRoutes);
+app.use('/productCategory', productCategoryRoutes)
+app.use('/rfidscanner', rfidScannerRoutes)
+app.use('/order', ShipmentOrderRoutes)
 
 app.use(errorHandler);
 
