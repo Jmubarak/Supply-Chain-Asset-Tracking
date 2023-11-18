@@ -2,21 +2,14 @@ import { body, param } from 'express-validator';
 
 export const RFIDTagValidators = {
 
-    createTag: [
-        body('associatedOrderID')
+    createTag : [
+        body('associatedOrder.orderID')
             .isInt()
             .withMessage('Associated order ID should be an integer.'),
-        body('createdByUserID')
+        body('createdByUser.userID')
             .isInt()
             .withMessage('Created by user ID should be an integer.'),
     ],
-
-    getTagsCreatedByUser: [
-        param('userId')
-            .isInt()
-            .withMessage('User ID should be an integer.'),
-    ],
-
 
     getTagById: [
         param('tagId')
@@ -28,7 +21,7 @@ export const RFIDTagValidators = {
         param('tagId')
             .isInt()
             .withMessage('Tag ID should be an integer.'),
-        // Add specific fields you want to validate for updates, similar to body validators
+        
     ],
 
     deleteTag: [

@@ -8,7 +8,12 @@ export class RFIDTagController {
     static async createTag(req: Request, res: Response, next: NextFunction) {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return next({ status: 400, errors: errors.array() });
+            // Extracting error messages from the errors.array()
+        const errorMessages = errors.array().map(err => err.msg);
+
+        // Pass the error messages to the error-handling middleware
+        next({ status: 400, message: errorMessages.join(', '), errors: errors.array() });
+        return; // Ensures the rest of the handler won't run
         }
 
         const tagData = req.body;
@@ -24,7 +29,12 @@ export class RFIDTagController {
     static async getTagsCreatedByUser(req: UserRequest, res: Response, next: NextFunction) {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return next(errors.array());
+            // Extracting error messages from the errors.array()
+        const errorMessages = errors.array().map(err => err.msg);
+
+        // Pass the error messages to the error-handling middleware
+        next({ status: 400, message: errorMessages.join(', '), errors: errors.array() });
+        return; // Ensures the rest of the handler won't run
         }
 
         try {
@@ -38,7 +48,12 @@ export class RFIDTagController {
     static async getTagById(req: Request, res: Response, next: NextFunction) {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return next(errors.array());
+           // Extracting error messages from the errors.array()
+        const errorMessages = errors.array().map(err => err.msg);
+
+        // Pass the error messages to the error-handling middleware
+        next({ status: 400, message: errorMessages.join(', '), errors: errors.array() });
+        return; // Ensures the rest of the handler won't run
         }
 
         const tagId = parseInt(req.params.tagId, 10);
@@ -57,7 +72,12 @@ export class RFIDTagController {
     static async updateTag(req: Request, res: Response, next: NextFunction) {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return next(errors.array());
+            // Extracting error messages from the errors.array()
+        const errorMessages = errors.array().map(err => err.msg);
+
+        // Pass the error messages to the error-handling middleware
+        next({ status: 400, message: errorMessages.join(', '), errors: errors.array() });
+        return; // Ensures the rest of the handler won't run
         }
 
         const tagId = parseInt(req.params.tagId, 10);
@@ -78,7 +98,12 @@ export class RFIDTagController {
     static async deleteTag(req: Request, res: Response, next: NextFunction) {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return next(errors.array());
+            // Extracting error messages from the errors.array()
+        const errorMessages = errors.array().map(err => err.msg);
+
+        // Pass the error messages to the error-handling middleware
+        next({ status: 400, message: errorMessages.join(', '), errors: errors.array() });
+        return; // Ensures the rest of the handler won't run
         }
 
         const tagId = parseInt(req.params.tagId, 10);

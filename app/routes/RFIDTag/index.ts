@@ -17,7 +17,6 @@ router.post(
 // Get all RFID tags created by a user
 router.get(
     '/user',
-    RFIDTagValidators.getTagsCreatedByUser,
     RFIDTagController.getTagsCreatedByUser
 );
 
@@ -27,13 +26,13 @@ router.get(
     RFIDTagValidators.getTagById,
     RFIDTagController.getTagById
 );
-
+//update is not needed?
 // Update a specific RFID tag by ID
-router.patch(
-    '/:tagId',
-    RFIDTagValidators.updateTag,
-    RFIDTagController.updateTag
-);
+//router.patch(
+  //  '/:tagId',
+    //RFIDTagValidators.updateTag,
+    //RFIDTagController.updateTag
+//);
 
 // Delete a specific RFID tag by ID
 router.delete(

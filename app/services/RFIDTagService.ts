@@ -5,35 +5,41 @@ import { AppDataSource } from '../src/data-source';
 
 class RFIDTagService {
   
-    static async createTag(tagData: Partial<RFIDTag>): Promise<RFIDTag> {
-        try {
-          const userRepository = AppDataSource.getRepository(User);
-          const orderRepository = AppDataSource.getRepository(ShipmentOrder);
-          const tagRepository = AppDataSource.getRepository(RFIDTag);
-    
-          // Check if the associated user exists
-          if (tagData.createdByUser) {
-            const userExists = await userRepository.findOneBy({ userID: tagData.createdByUser.userID });
-            if (!userExists) {
-              throw new Error('Associated user does not exist.');
-            }
-          }
-    
-          // Check if the associated order exists
-          if (tagData.associatedOrder) {
-            const orderExists = await orderRepository.findOneBy({ orderID: tagData.associatedOrder.orderID });
-            if (!orderExists) {
-              throw new Error('Associated order does not exist.');
-            }
-          }
-    
-          const tag = tagRepository.create(tagData);
-          return await tagRepository.save(tag);
-        } catch (error) {
-          console.error("Database error during tag creation:", error);
-          throw new Error('Failed to create tag. Please try again later.');
-        }
+  static async createTag(tagData: Partial<RFIDTag>): Promise<RFIDTag> {
+    try {
+      const userRepository = AppDataSource.getRepository(User);
+      const orderRepository = AppDataSource.getRepository(ShipmentOrder);
+      const tagRepository = AppDataSource.getRepository(RFIDTag);
+  
+      // Ensuring createdByUser and associatedOrder are provided
+      if (!tagData.createdByUser || !tagData.createdByUser.userID) {
+        throw new Error('Created by user ID must be provided.');
       }
+      if (!tagData.associatedOrder || !tagData.associatedOrder.orderID) {
+        throw new Error('Associated order ID must be provided.');
+      }
+  
+      // Check if the associated user exists
+      const userExists = await userRepository.findOneBy({ userID: tagData.createdByUser.userID });
+      if (!userExists) {
+        throw new Error('Associated user does not exist.');
+      }
+  
+      // Check if the associated order exists
+      const orderExists = await orderRepository.findOneBy({ orderID: tagData.associatedOrder.orderID });
+      if (!orderExists) {
+        throw new Error('Associated order does not exist.');
+      }
+  
+      const tag = tagRepository.create(tagData);
+      return await tagRepository.save(tag);
+    } catch (error) {
+      console.error("Database error during tag creation:", error);
+      throw new Error('Failed to create tag. Please try again later.');
+    }
+  }
+  
+  
     
 
   static async getAllTags(): Promise<RFIDTag[]> {
@@ -45,9 +51,13 @@ class RFIDTagService {
     }
   }
 
-  static async getTagsCreatedByUserWithOrderInfo(userId: number): Promise<any[]> {
+static async getTagsCreatedByUserWithOrderInfo(userId: number): Promise<any[]> {
     try {
+      console.log('Starting to fetch tags created by user with ID:', userId);
+
       const tagRepository = AppDataSource.getRepository(RFIDTag);
+      console.log('RFIDTag repository accessed successfully');
+
       const tags = await tagRepository
           .createQueryBuilder("rfidTag")
           .leftJoinAndSelect("rfidTag.createdByUser", "user")
@@ -55,12 +65,18 @@ class RFIDTagService {
           .where("user.userID = :userId", { userId })
           .getMany();
 
-      return tags.map(this.mapTagToStructuredObject);
+      console.log(`Found ${tags.length} tags created by user with ID: ${userId}`);
+
+      const structuredTags = tags.map(this.mapTagToStructuredObject);
+      console.log(`Structured tags created successfully for user with ID: ${userId}`);
+
+      return structuredTags;
     } catch (error) {
       console.error("Database error during fetching tags and associated orders created by user:", error);
       throw new Error('Failed to fetch tags and their associated orders created by the user. Please try again later.');
     }
-  }
+}
+
   
   static async getTagById(tagId: number): Promise<RFIDTag | null> {
     try {
@@ -109,6 +125,8 @@ class RFIDTagService {
           },
           associatedOrder: rfidTag.associatedOrder ? {
             orderID: rfidTag.associatedOrder.orderID,
+            status: rfidTag.associatedOrder.status
+            
             
           } : null
         };
