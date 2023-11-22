@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn,CreateDateColumn  } from 'typeorm';
 import { RFIDScanner } from './RFIDScanner';
 import { RFIDTag } from './RFIDTag';
 
@@ -15,6 +15,6 @@ export class RFIDScanRecord {
     @JoinColumn({ name: 'tagID' })
     tag: RFIDTag;
 
-    @Column()
+    @CreateDateColumn()
     scanTimestamp: Date;
 }
