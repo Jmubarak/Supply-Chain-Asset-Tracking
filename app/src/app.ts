@@ -57,6 +57,7 @@ app.use('/rfidtag', rfidTagRoutes)
 app.use('/rfidscannerrecord', rfidScannerRecordRoutes)
 app.use('/sensornode',sensorNode)
 
+
 app.use(errorHandler);
 
 export default app;
