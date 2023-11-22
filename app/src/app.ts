@@ -18,6 +18,10 @@ import ShipmentOrderRoutes from '../routes/shipmentOrder';
 
 import rfidTagRoutes from '../routes/RFIDTag'
 
+import rfidScannerRecordRoutes from '../routes/RFIDScannerRecord'
+
+import sensorNode from '../routes/sensorNode'
+
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     // Log the error (consider using a more sophisticated logger in a real application)
     console.error(err.message);
@@ -50,6 +54,8 @@ app.use('/productCategory', productCategoryRoutes)
 app.use('/rfidscanner', rfidScannerRoutes)
 app.use('/order', ShipmentOrderRoutes)
 app.use('/rfidtag', rfidTagRoutes)
+app.use('/rfidscannerrecord', rfidScannerRecordRoutes)
+app.use('/sensornode',sensorNode)
 
 app.use(errorHandler);
 
