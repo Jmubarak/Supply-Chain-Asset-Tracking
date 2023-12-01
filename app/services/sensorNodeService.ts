@@ -24,13 +24,20 @@ class SensorNodeService {
 
   static async getSensorNodeById(nodeId: number): Promise<SensorNode | null> {
     try {
-      const sensorNode = await AppDataSource.getRepository(SensorNode).findOne({ where: { nodeID: nodeId } });
-      return sensorNode || null;
+        const sensorNodeRepository = AppDataSource.getRepository(SensorNode);
+        const sensorNodeWithRFIDScanners = await sensorNodeRepository
+            .createQueryBuilder("sensorNode")
+            .leftJoinAndSelect("sensorNode.rfidScanners", "rfidScanner")
+            .where("sensorNode.nodeID = :nodeId", { nodeId })
+            .getOne();
+
+        return sensorNodeWithRFIDScanners || null;
     } catch (error) {
-      console.error("Database error during sensor node fetch:", error);
-      throw new Error('Failed to fetch sensor node. Please try again later.');
+        console.error("Database error during sensor node fetch:", error);
+        throw new Error('Failed to fetch sensor node. Please try again later.');
     }
-  }
+}
+
 
   static async updateSensorNode(nodeId: number, updatedSensorNodeData: Partial<SensorNode>): Promise<SensorNode | null> {
     try {

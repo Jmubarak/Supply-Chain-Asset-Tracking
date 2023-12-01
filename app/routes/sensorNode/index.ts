@@ -11,7 +11,7 @@ router.get('/', SensorNodeController.getAllSensorNodes);
 router.get('/:id', SensorNodeController.getSensorNodeById);
 
 // Create a new SensorNode
-router.post('/', sensorNodeValidators, SensorNodeController.createSensorNode);
+router.post('/', SensorNodeController.createSensorNode);
 
 // Update a SensorNode by its ID
 router.put('/:id', sensorNodeValidators, SensorNodeController.updateSensorNode);

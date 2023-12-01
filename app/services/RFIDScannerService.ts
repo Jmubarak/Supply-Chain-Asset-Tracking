@@ -5,14 +5,20 @@ class RFIDScannerService {
   
   static async createScanner(scannerData: Partial<RFIDScanner>): Promise<RFIDScanner> {
     try {
-      const scannerRepository = AppDataSource.getRepository(RFIDScanner);
-      const scanner = scannerRepository.create(scannerData);
-      return await scannerRepository.save(scanner);
+        console.log("Received scanner data:", scannerData); // Log the received data
+
+        const scannerRepository = AppDataSource.getRepository(RFIDScanner);
+        const scanner = scannerRepository.create(scannerData);
+
+        const savedScanner = await scannerRepository.save(scanner);
+
+        return savedScanner;
     } catch (error) {
-      console.error("Database error during scanner creation:", error);
-      throw new Error('Failed to create scanner. Please try again later.');
+        console.error("Database error during scanner creation:", error);
+        throw new Error('Failed to create scanner. Please try again later.');
     }
-  }
+}
+
 
   static async getAllScanners(): Promise<RFIDScanner[]> {
     try {
@@ -25,13 +31,21 @@ class RFIDScannerService {
 
   static async getScannerById(scannerId: number): Promise<RFIDScanner | null> {
     try {
-      const scanner = await AppDataSource.getRepository(RFIDScanner).findOne({ where: { scannerID: scannerId } });
-      return scanner || null;
+        const scannerRepository = AppDataSource.getRepository(RFIDScanner);
+        const scanner = await scannerRepository
+            .createQueryBuilder("rfidScanner")
+            .leftJoinAndSelect("rfidScanner.node", "sensorNode")
+            .addSelect("sensorNode.nodeID")
+            .where("rfidScanner.scannerID = :scannerId", { scannerId })
+            .getOne();
+
+        return scanner || null;
     } catch (error) {
-      console.error("Database error during scanner fetch:", error);
-      throw new Error('Failed to fetch scanner. Please try again later.');
+        console.error("Database error during scanner fetch:", error);
+        throw new Error('Failed to fetch scanner. Please try again later.');
     }
-  }
+}
+
 
   static async updateScanner(scannerId: number, updatedScannerData: Partial<RFIDScanner>): Promise<RFIDScanner | null> {
     try {
