@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import RFIDScanRecordService from '../../services/RFIDScannerRecordService';
+import { RFIDTag } from '../../src/entity/RFIDTag';
 
 class RFIDScanRecordController {
 
@@ -32,6 +33,40 @@ class RFIDScanRecordController {
             next(error);
         }
     }
+
+
+
+    async getCurrentNodeOfTag(req: Request, res: Response, next: NextFunction) {
+        try {
+            const tagIDStr = req.params.tagID;
+    
+            if (!tagIDStr) {
+                return res.status(400).json({ message: 'Tag ID is required.' });
+            }
+    
+            // Convert tagID to a number if necessary
+            const tagID = Number(tagIDStr);
+            if (isNaN(tagID)) {
+                return res.status(400).json({ message: 'Invalid Tag ID.' });
+            }
+    
+            // Construct a partial RFIDTag object
+            const partialTag: Partial<RFIDTag> = { tagID };
+    
+            const nodeID = await RFIDScanRecordService.getCurrentNodeOfTag(partialTag);
+    
+            if (nodeID === null) {
+                res.status(404).json({ message: 'Tag not found or not currently in a node.' });
+            } else {
+                res.json({ nodeID: nodeID });
+            }
+        } catch (error) {
+            next(error);
+        }
+    }
+    
+    
+
 
     async updateScanRecord(req: Request, res: Response, next: NextFunction) {
         try {

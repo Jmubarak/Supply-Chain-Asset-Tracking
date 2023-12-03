@@ -37,18 +37,34 @@ async function registerRFIDScanner(nodeID: number): Promise<number> {
     }
 }
 
-function postTemperatureReadings(nodeID: number) {
+function postEnvironmentalReadings(nodeID: number) {
     const client = mqtt.connect(MQTT_BROKER_URL);
-    const topic = `sensorNode/${nodeID}/temperature`;
+    const topic = `sensorNode/${nodeID}/environment`;
+
+    // Starting coordinates for London
+    let latitude = 51.5074;  // Latitude for London
+    let longitude = -0.1278; // Longitude for London
 
     client.on('connect', () => {
         setInterval(() => {
-            const tempReading = (Math.random() * 35).toFixed(2); // Generates a random temperature
-            client.publish(topic, tempReading);
-            console.log(`Published temperature reading ${tempReading} to ${topic}`);
+            // Simulate movement by randomly adjusting latitude and longitude
+            latitude += (Math.random() - 0.5) * 0.001; // Smaller adjustment for more realistic movement
+            longitude += (Math.random() - 0.5) * 0.001;
+
+            const environmentalData = {
+                temperature: parseFloat((Math.random() * 35).toFixed(2)),
+                humidity: parseFloat((Math.random() * 100).toFixed(2)),
+                latitude: parseFloat(latitude.toFixed(6)),
+                longitude: parseFloat(longitude.toFixed(6))
+            };
+
+            client.publish(topic, JSON.stringify(environmentalData));
+            console.log(`Published environmental data ${JSON.stringify(environmentalData)} to ${topic}`);
         }, 5000); // Publish every 5 seconds
     });
 }
+
+
 
 async function sendTagScan(scannerID: number) {
     while (true) {
@@ -104,7 +120,7 @@ async function startSimulation() {
     }
 
     // Start posting temperature readings
-    postTemperatureReadings(nodeID);
+    postEnvironmentalReadings(nodeID);
 
     // Start scanning tags
     await sendTagScan(scannerID);

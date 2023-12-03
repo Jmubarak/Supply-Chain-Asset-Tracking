@@ -4,11 +4,15 @@ import { rfidScanRecordValidators } from '../../middleware/RFIDScannerRecordVali
 
 const router = Router();
 
-// Fetch all RFIDScanRecords
-router.get('/', RFIDScanRecordController.getAllScanRecords);
+
+//get the latest sensor node where at tag was scanned in (if any)
+router.get('/tag/:tagID', RFIDScanRecordController.getCurrentNodeOfTag);
 
 // Fetch an RFIDScanRecord by its ID
 router.get('/:id', RFIDScanRecordController.getScanRecordById);
+
+// Fetch all RFIDScanRecords
+router.get('/', RFIDScanRecordController.getAllScanRecords);
 
 // Create a new RFIDScanRecord
 router.post('/', rfidScanRecordValidators, RFIDScanRecordController.createScanRecord);
