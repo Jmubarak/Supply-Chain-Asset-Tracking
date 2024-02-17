@@ -27,6 +27,6 @@
       "start": "ts-node src/index.ts",
       "dev": "nodemon",
       "typeorm": "typeorm-ts-node-commonjs",
-      "generate": "ts-node ./node_modules/typeorm/cli.js migration:generate -d ./src/data-source.ts  -p"
+      "generate": "ts-node ./node_modules/typeorm/cli.js migration:generate -d ./src/data-source.ts  -p true"
    }
 }
