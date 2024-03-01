@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, OneToMany } from 'typeorm';
 import { User } from './User';
 import { NonUser } from './NonUser';  // Import the NonUser entity
 import { Product } from './Product';
+import { RFIDTag } from './RFIDTag';
 
 @Entity()
 export class ShipmentOrder {
@@ -36,4 +37,7 @@ export class ShipmentOrder {
         default: 'Pending'
     })
     status: 'Pending' | 'Shipped' | 'Delivered' | 'Cancelled';
+
+    @OneToMany(() => RFIDTag, rfidTag => rfidTag.associatedOrder)
+    rfidTags: RFIDTag[];
 }

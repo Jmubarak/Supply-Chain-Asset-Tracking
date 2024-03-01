@@ -2,6 +2,7 @@ import { RFIDTag } from '../src/entity/RFIDTag';
 import {User} from '../src/entity/User';
 import { ShipmentOrder } from '../src/entity/ShipmentOrder';
 import { AppDataSource } from '../src/data-source';
+import { EntityManager } from 'typeorm';
 
 class RFIDTagService {
   
@@ -32,15 +33,49 @@ class RFIDTagService {
       }
   
       const tag = tagRepository.create(tagData);
-      return await tagRepository.save(tag);
+      const savedTag =  await tagRepository.save(tag);
+      return this.mapTagToStructuredObject(savedTag);
     } catch (error) {
       console.error("Database error during tag creation:", error);
       throw new Error('Failed to create tag. Please try again later.');
     }
   }
-  
-  
-    
+
+  static async createTagForOrder(transactionManager: EntityManager, orderId: number, userId: number): Promise<RFIDTag> {
+    try {
+        const userRepository = AppDataSource.getRepository(User);
+        const orderRepository = transactionManager.getRepository(ShipmentOrder);
+        const tagRepository = transactionManager.getRepository(RFIDTag);
+
+        // Check if the associated user exists
+        const userExists = await userRepository.findOneBy({ userID: userId });
+        if (!userExists) {
+            throw new Error('Associated user does not exist.');
+        }
+
+        // Check if the associated order exists
+        const orderExists = await orderRepository.findOneBy({ orderID: orderId });
+        if (!orderExists) {
+            throw new Error('Associated order does not exist.');
+        }
+
+        // Now that we have validated the existence of both the user and the order, 
+        // create the tag with the provided userId and orderId
+        const tagData: Partial<RFIDTag> = {
+            createdByUser: userExists, // Directly assigning the user object
+            associatedOrder: orderExists // Directly assigning the order object
+        };
+
+        const tag = tagRepository.create(tagData);
+        const savedTag = await tagRepository.save(tag);
+        return this.mapTagToStructuredObject(savedTag);
+    } catch (error) {
+        console.error("Database error during tag creation:", error);
+        throw new Error('Failed to create tag. Please try again later.');
+    }
+}
+
+      
 
   static async getAllTags(): Promise<RFIDTag[]> {
     try {

@@ -3,12 +3,6 @@ import { body, param } from 'express-validator';
 export const ShipmentOrderValidators = {
 
     createShipmentOrder: [
-        body('senderName')
-            .isString()
-            .trim()
-            .notEmpty()
-            .withMessage('Sender name is required.'),
-        
         body('recipientName')
             .optional()
             .isString()

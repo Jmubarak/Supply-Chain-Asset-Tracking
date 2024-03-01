@@ -6,7 +6,7 @@ import {UserRequest} from '../../interfaces/userRequest'
 
 ///return validation errors correctly
 export class ShipmentOrderController {
-    static async createShipmentOrder(req: Request, res: Response, next: NextFunction) {
+    static async createShipmentOrder(req: UserRequest, res: Response, next: NextFunction) {
         console.log("[DEBUG] createShipmentOrder - Entry");
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -18,11 +18,12 @@ export class ShipmentOrderController {
             return; // Ensures the rest of the handler won't run
         }
 
-        const { senderName, recipientName, ...orderData } = req.body;
+        const {recipientName, ...orderData } = req.body;
+        const senderID = req.user.userId
 
         try {
-            console.log("[DEBUG] createShipmentOrder - Processing order for:", senderName, recipientName);
-            const order = await ShipmentOrderService.createShipmentOrder(senderName, recipientName, orderData);
+            console.log("[DEBUG] createShipmentOrder - Processing order for:", senderID, recipientName);
+            const order = await ShipmentOrderService.createOrderAndRelatedEntity(senderID, recipientName, orderData);
             res.status(201).json(order);
         } catch (error) {
             console.error("[DEBUG] createShipmentOrder - Error:", error);
