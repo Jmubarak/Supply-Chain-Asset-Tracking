@@ -3,18 +3,22 @@ import { User } from '../src/entity/User';
 import { NonUser } from '../src/entity/NonUser';
 import { Product } from '../src/entity/Product';
 import { AppDataSource } from '../src/data-source';
+import RFIDTagService from './RFIDTagService';
+import { EntityManager } from 'typeorm';
+import { RFIDTag } from '../src/entity/RFIDTag';
 
 class ShipmentOrderService {
   
-    static async createShipmentOrder(senderName: string, recipientName: string | null, orderData: Partial<ShipmentOrder>): Promise<ShipmentOrder> {
+    static async createShipmentOrder(transactionManager: EntityManager,senderId: number, recipientName: string | null, orderData: Partial<ShipmentOrder>): Promise<{ shipmentDate: string, orderID: number, status: string }> {
         try {
             const userRepository = AppDataSource.getRepository(User);
-            const nonUserRepository = AppDataSource.getRepository(NonUser);  // Get the NonUser repository
-            const orderRepository = AppDataSource.getRepository(ShipmentOrder);
+            const nonUserRepository = AppDataSource.getRepository(NonUser);  
+            const orderRepository = transactionManager.getRepository(ShipmentOrder);
             const productRepository = AppDataSource.getRepository(Product);
+        
             
-            // Check for sender existence in the database
-            const sender = await userRepository.findOne({ where: { name: senderName } });
+            // Check for sender existence in the database using userID
+            const sender = await userRepository.findOne({ where: { userID: senderId } });
             if (!sender) {
                 throw new Error('Sender not found in the system.');
             }
@@ -44,7 +48,7 @@ class ShipmentOrderService {
                 }
             }
     
-            // Associate the shipment with the sender and possibly a recipient using their IDs
+            // Associate the shipment with the sender (using userID) and possibly a recipient
             orderData.sender = sender;
     
             if (recipientUser) {
@@ -54,12 +58,15 @@ class ShipmentOrderService {
             }
     
             const order = orderRepository.create(orderData);
-            return await orderRepository.save(order);
+            const savedOrder = await orderRepository.save(order);
+    
+            return this.mapShipmentOrderToStructuredObject(savedOrder);
         } catch (error) {
             console.error("Database error during shipment order creation:", error);
             throw error; // Re-throw the error to allow for proper error handling upstream
         }
     }
+    
     
   
 
@@ -72,16 +79,19 @@ class ShipmentOrderService {
                 .leftJoinAndSelect("shipmentOrder.recipientUser", "recipientUser", "recipientUser.userID = :userId", { userId })
                 .leftJoinAndSelect("shipmentOrder.recipientNonUser", "recipientNonUser")
                 .leftJoinAndSelect("shipmentOrder.product", "product")
+                // Join RFIDTag table and select tagID
+                .leftJoinAndSelect("shipmentOrder.rfidTags", "rfidTag")
                 .where("sender.userID = :userId OR recipientUser.userID = :userId", { userId })
                 .getMany();
-
-            // Map the results to the structured format
+    
+            // Assuming mapShipmentOrderToStructuredObject is adequately defined to include RFIDTags
             return results.map(this.mapShipmentOrderToStructuredObject);
         } catch (error) {
             console.error("Database error during shipment orders fetch:", error);
             throw new Error('Failed to fetch shipment orders. Please try again later.');
         }
     }
+    
 
     private static mapShipmentOrderToStructuredObject(shipmentOrder: ShipmentOrder): any {
         return {
@@ -107,7 +117,8 @@ class ShipmentOrderService {
             recipientNonUser: shipmentOrder.recipientNonUser ? {
                 name: shipmentOrder.recipientNonUser.name,
                 // ...other recipient fields, depending on whether recipient is a User or NonUser
-            } : null
+            } : null,
+            tagsID: shipmentOrder.rfidTags
         };
     }
 
@@ -163,6 +174,33 @@ static async deleteShipmentOrder(orderId: number): Promise<void> {
     } catch (error) {
         console.error("Database error during shipment order deletion:", error);
         throw new Error('Failed to delete shipment order. Please try again later.');
+    }
+}
+
+
+
+static async createOrderAndRelatedEntity(senderId: number, recipientName: string | null, orderData: Partial<ShipmentOrder>){
+     // Assuming you have a function to get your TypeORM data source
+    const queryRunner = AppDataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+        
+        
+
+        const order = await this.createShipmentOrder(queryRunner.manager, senderId, recipientName, orderData);
+        const tag = await RFIDTagService.createTagForOrder(queryRunner.manager, order.orderID, senderId);
+
+        await queryRunner.commitTransaction();
+        return { order, tag };
+    } catch (error) {
+        await queryRunner.rollbackTransaction();
+        console.error("Transaction failed:", error);
+        throw error; // Or handle it as per your strategy
+    } finally {
+        await queryRunner.release();
     }
 }
 
