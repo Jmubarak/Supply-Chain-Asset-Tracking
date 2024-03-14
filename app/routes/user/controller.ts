@@ -62,7 +62,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
         const maxAge = expiresInToMilliseconds(process.env.TOKEN_EXPIRATION!);  
         
         res.cookie('auth_token', token, {
-            httpOnly: true,
+            httpOnly: false,
             maxAge: maxAge,
             // Other cookie options like 'secure: true' if using HTTPS
         });

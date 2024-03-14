@@ -59,6 +59,7 @@ class ShipmentOrderService {
     
             const order = orderRepository.create(orderData);
             const savedOrder = await orderRepository.save(order);
+            console.log(savedOrder.orderID)
     
             return this.mapShipmentOrderToStructuredObject(savedOrder);
         } catch (error) {
@@ -83,8 +84,7 @@ class ShipmentOrderService {
                 .leftJoinAndSelect("shipmentOrder.rfidTags", "rfidTag")
                 .where("sender.userID = :userId OR recipientUser.userID = :userId", { userId })
                 .getMany();
-    
-            // Assuming mapShipmentOrderToStructuredObject is adequately defined to include RFIDTags
+          
             return results.map(this.mapShipmentOrderToStructuredObject);
         } catch (error) {
             console.error("Database error during shipment orders fetch:", error);
@@ -95,21 +95,21 @@ class ShipmentOrderService {
 
     private static mapShipmentOrderToStructuredObject(shipmentOrder: ShipmentOrder): any {
         return {
-            order: {
+            
                 orderID: shipmentOrder.orderID,
                 quantity: shipmentOrder.quantity,
                 shipmentDate: shipmentOrder.shipmentDate,
                 status: shipmentOrder.status
-            },
+            ,
             product: {
                 productID: shipmentOrder.product.productID,
                 productName: shipmentOrder.product.productName,
                 // ...other product fields
             },
-            sender: {
+            sender: shipmentOrder.sender? {
                 name: shipmentOrder.sender.name,
                 // ...other sender fields
-            },
+            }: null,
             recipientUser: shipmentOrder.recipientUser ? {
                 name: shipmentOrder.recipientUser.name,
                 // ...other recipient fields, depending on whether recipient is a User or NonUser
@@ -191,6 +191,7 @@ static async createOrderAndRelatedEntity(senderId: number, recipientName: string
         
 
         const order = await this.createShipmentOrder(queryRunner.manager, senderId, recipientName, orderData);
+        console.log(order.orderID)
         const tag = await RFIDTagService.createTagForOrder(queryRunner.manager, order.orderID, senderId);
 
         await queryRunner.commitTransaction();
