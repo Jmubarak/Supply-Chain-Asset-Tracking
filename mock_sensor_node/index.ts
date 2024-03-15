@@ -22,9 +22,31 @@ async function registerSensorNode() {
     }
 }
 
+function getRandomLocation() {
+    // List of locations in England
+    const locations = [
+        "London Distribution Center",
+        "Manchester Logistics Hub",
+        "Birmingham Warehouse",
+        "Liverpool Shipping Hub",
+        "Bristol Dispatch Unit",
+        "Newcastle Delivery Station",
+        "Leeds Distribution Point",
+        "Sheffield Storage Facility",
+        "Nottingham Fulfillment Center",
+        "Southampton Cargo Handling"
+    ];
+
+    // Generate a random index to select a location
+    const randomIndex = Math.floor(Math.random() * locations.length);
+    return locations[randomIndex];
+}
+
+
 async function registerRFIDScanner(nodeID: number): Promise<number> {
     try {
-        const response = await axios.post(RFID_SCANNER_REGISTRATION_URL, { node: { nodeID } });
+        const location = getRandomLocation();
+        const response = await axios.post(RFID_SCANNER_REGISTRATION_URL, { node: { nodeID }, location: location });
         const scannerID = response.data.scannerID;
         if (typeof scannerID !== 'number') {
             throw new Error(`Invalid scannerID received: ${scannerID}`);

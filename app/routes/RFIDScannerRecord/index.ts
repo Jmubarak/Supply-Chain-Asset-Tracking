@@ -8,6 +8,7 @@ const router = Router();
 //get the latest sensor node where at tag was scanned in (if any)
 router.get('/tag/:tagID', RFIDScanRecordController.getCurrentNodeOfTag);
 
+router.get('/location/:tagID', RFIDScanRecordController.getLocationsForTag);
 // Fetch an RFIDScanRecord by its ID
 router.get('/:id', RFIDScanRecordController.getScanRecordById);
 

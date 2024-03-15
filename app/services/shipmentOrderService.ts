@@ -76,21 +76,22 @@ class ShipmentOrderService {
             const orderRepository = AppDataSource.getRepository(ShipmentOrder);
             const results = await orderRepository
                 .createQueryBuilder("shipmentOrder")
-                .leftJoinAndSelect("shipmentOrder.sender", "sender", "sender.userID = :userId", { userId })
-                .leftJoinAndSelect("shipmentOrder.recipientUser", "recipientUser", "recipientUser.userID = :userId", { userId })
+                .leftJoinAndSelect("shipmentOrder.sender", "sender")
+                .leftJoinAndSelect("shipmentOrder.recipientUser", "recipientUser")
                 .leftJoinAndSelect("shipmentOrder.recipientNonUser", "recipientNonUser")
                 .leftJoinAndSelect("shipmentOrder.product", "product")
                 // Join RFIDTag table and select tagID
                 .leftJoinAndSelect("shipmentOrder.rfidTags", "rfidTag")
                 .where("sender.userID = :userId OR recipientUser.userID = :userId", { userId })
                 .getMany();
-          
+            console.log(results);
             return results.map(this.mapShipmentOrderToStructuredObject);
         } catch (error) {
             console.error("Database error during shipment orders fetch:", error);
             throw new Error('Failed to fetch shipment orders. Please try again later.');
         }
     }
+    
     
 
     private static mapShipmentOrderToStructuredObject(shipmentOrder: ShipmentOrder): any {

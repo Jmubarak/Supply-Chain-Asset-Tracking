@@ -65,7 +65,33 @@ class RFIDScanRecordController {
         }
     }
     
-    
+    async getLocationsForTag(req: Request, res: Response, next: NextFunction) {
+        try {
+            const tagIDStr = req.params.tagID;
+
+            if (!tagIDStr) {
+                return res.status(400).json({ message: 'Tag ID is required.' });
+            }
+
+            const tagID = Number(tagIDStr);
+            if (isNaN(tagID)) {
+                return res.status(400).json({ message: 'Invalid Tag ID.' });
+            }
+
+            // Assuming your service method is named getLocationsForTag and accepts a Partial<RFIDTag>
+            const partialTag: Partial<RFIDTag> = { tagID };
+            const locations = await RFIDScanRecordService.getLocationsForTag(partialTag);
+
+            if (!locations || locations.length === 0) {
+                res.status(404).json({ message: 'No locations found for the provided Tag ID.' });
+            } else {
+                res.json({ locations });
+            }
+        } catch (error) {
+            console.error('Error in getLocationsForTag:', error);
+            next(error);
+        }
+    }
 
 
     async updateScanRecord(req: Request, res: Response, next: NextFunction) {

@@ -24,6 +24,36 @@ class RFIDScanRecordService {
     }
   }
 
+  static async getLocationsForTag(rfidTag: Partial<RFIDTag>): Promise<string[]> {
+    if (!rfidTag.tagID) {
+        throw new Error('RFIDTag must have a tagID.');
+    }
+
+    try {
+        const recordRepository = AppDataSource.getRepository(RFIDScanRecord);
+        console.log('Fetching scanner records for RFID Tag ID: ', rfidTag.tagID);
+
+        // Fetch scanner records and associated scanner locations for the given RFID tag ID
+        const scanRecords = await recordRepository
+        .createQueryBuilder("record")
+        .leftJoinAndSelect("record.scanner", "scanner")
+        .where("record.tagId = :tagId", { tagId: rfidTag.tagID })
+        .orderBy("scanner.location", "ASC")
+        .getMany();
+    
+
+        // Extract unique locations from the scan records in sorted order
+        const locations = Array.from(new Set(scanRecords.map(record => record.scanner.location))).sort();
+
+        console.log('Locations associated with the RFID Tag ID: ', rfidTag.tagID, locations);
+
+        return locations;
+    } catch (error) {
+        console.error("Database error during fetching locations for RFID Tag: ", error);
+        throw new Error('Failed to fetch locations for RFID Tag. Please try again later.');
+    }
+}
+
   static async getScanRecordById(recordId: number): Promise<RFIDScanRecord | null> {
     try {
       const record = await AppDataSource.getRepository(RFIDScanRecord).findOne({ where: { recordID: recordId } });
